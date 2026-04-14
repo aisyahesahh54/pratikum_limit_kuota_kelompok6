@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:limit_kuota/src/features/monitoring/network_page.dart';
+import 'package:pratikum_limit_kuota_kelompok6/src/features/monitoring/network_page.dart';
 
 void main() {
   // Jalankan MyApp, bukan langsung Network
@@ -17,3 +17,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+ini kode ai

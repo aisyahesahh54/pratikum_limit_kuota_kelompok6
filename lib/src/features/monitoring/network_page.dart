@@ -18,15 +18,20 @@ class _NetworkState extends State<Network> {
   String wifiUsage = "0.00 MB";
   String mobileUsage = "0.00 MB";
 
+  bool isDarkMode = false;
+  String statusUsage = "Aman";
+
   @override
   void initState() {
     super.initState();
-    fetchUsage();
+    _startAutoRefresh();
+  }
 
-    // Auto refresh tiap 10 detik
-    Future.delayed(const Duration(seconds: 10), () {
-      fetchUsage();
-    });
+  void _startAutoRefresh() async {
+    while (mounted) {
+      await fetchUsage();
+      await Future.delayed(const Duration(seconds: 10));
+    }
   }
 
   Future<void> fetchUsage() async {
@@ -50,7 +55,13 @@ class _NetworkState extends State<Network> {
         mobileUsage = _formatBytes(mobileBytes);
       });
 
-      // Cek limit
+      double totalMb =
+          (wifiBytes + mobileBytes) / (1024 * 1024);
+
+      setState(() {
+        _updateStatus(totalMb);
+      });
+
       checkLimitAndWarn(wifiBytes + mobileBytes);
     } on PlatformException catch (e) {
       if (e.code == "PERMISSION_DENIED") {
@@ -59,6 +70,17 @@ class _NetworkState extends State<Network> {
     }
   }
 
+  void _updateStatus(double totalMb) {
+    if (totalMb >= 900) {
+      statusUsage = "Bahaya ⚠️";
+    } else if (totalMb >= 700) {
+      statusUsage = "Waspada ⚡";
+    } else if (totalMb >= 500) {
+      statusUsage = "Aman ✅";
+    } else if (totalMb >= 500) {
+  }
+
+}
   String _formatBytes(int bytes) {
     if (bytes <= 0) return "0.00 MB";
     double mb = bytes / (1024 * 1024);
@@ -76,8 +98,8 @@ class _NetworkState extends State<Network> {
 
   Color _getUsageColor(String value) {
     double number = double.tryParse(value.split(" ")[0]) ?? 0;
-    if (number >= 900) return Colors.red;
-    if (number >= 700) return Colors.orange;
+    if (number >= 900) return const Color.fromARGB(255, 212, 209, 11);
+    if (number >= 700) return const Color.fromARGB(255, 190, 198, 255);
     return Colors.green;
   }
 
@@ -88,7 +110,7 @@ class _NetworkState extends State<Network> {
   }
 
   Future<void> checkLimitAndWarn(int currentUsage) async {
-    int limitInBytes = 1024 * 1024 * 1024;
+    int limitInBytes = 2024 * 2024 * 2024;
 
     if (currentUsage >= limitInBytes) {
       showDialog(
@@ -119,17 +141,27 @@ class _NetworkState extends State<Network> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor:
+          isDarkMode ? Colors.black : const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: const Text('Monitoring Data'),
         centerTitle: true,
         actions: [
           IconButton(
+            icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+            onPressed: () {
+              setState(() {
+                isDarkMode = !isDarkMode;
+              });
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const HistoryPage()),
+                MaterialPageRoute(
+                    builder: (context) => const HistoryPage()),
               );
             },
           ),
@@ -142,11 +174,35 @@ class _NetworkState extends State<Network> {
           children: [
             Text(
               "Total Hari Ini: ${_totalUsage()}",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              "Status: $statusUsage",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: statusUsage.contains("Bahaya")
+                    ? Colors.red
+                    : statusUsage.contains("Waspada")
+                        ? Colors.orange
+                        : Colors.green,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            LinearProgressIndicator(
+              value: _calculatePercentage(_totalUsage()),
+              minHeight: 10,
+            ),
+
             const SizedBox(height: 20),
 
             _usageCard("WiFi Today", wifiUsage, Icons.wifi),
@@ -211,11 +267,19 @@ class _NetworkState extends State<Network> {
             ),
           ),
           const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: _calculatePercentage(value),
-            backgroundColor: Colors.white24,
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(Colors.yellow),
+
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: _calculatePercentage(value)),
+            duration: const Duration(seconds: 1),
+            builder: (context, val, _) {
+              return LinearProgressIndicator(
+                value: val,
+                backgroundColor:
+                    const Color.fromARGB(192, 194, 141, 18),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color.fromARGB(255, 165, 76, 2)),
+              );
+            },
           ),
         ],
       ),

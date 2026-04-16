@@ -1,22 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/core/features/homepage.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/features/monitoring/network_page.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MainPage(),
-    );
-  }
-}
+import 'home_page.dart';
+import 'settings_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -28,16 +12,15 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _index = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    Network(),
+  final List<Widget> _pages = [
+    const HomePage(),
+    const SettingsPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_index],
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (value) {
@@ -49,8 +32,8 @@ class _MainPageState extends State<MainPage> {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.network_check),
-            label: "Network",
+            icon: Icon(Icons.settings),
+            label: "Settings",
           ),
         ],
       ),

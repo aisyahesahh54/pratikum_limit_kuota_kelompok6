@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pratikum_limit_kuota_kelompok6/main_page.dart';
+import 'main_page.dart';
 
 void main() {
-  // Jalankan MyApp, bukan langsung Network
-  runApp(const MyApp()); 
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -12,8 +11,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      debugShowCheckedModeBanner: false, // Opsional: hilangkan banner debug
-      home:MainPage(),
+      debugShowCheckedModeBanner: false,
+      home: MainPage(),
     );
   }
 }

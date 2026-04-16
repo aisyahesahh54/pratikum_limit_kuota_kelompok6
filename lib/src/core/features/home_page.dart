@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pratikum_limit_kuota_kelompok6/src/core/data/database_helper.dart';
+import 'network_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

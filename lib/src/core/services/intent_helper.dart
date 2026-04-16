@@ -3,24 +3,24 @@ import 'package:android_intent_plus/flag.dart';
 import 'dart:io';
 
 class IntentHelper {
-  static Future<void> openDataLimitSettings() async {
-    if (Platform.isAndroid) {
-      // Intent ini mengarahkan langsung ke pengaturan penggunaan data
-      const intent = AndroidIntent(
-        action: 'android.settings.DATA_USAGE_SETTINGS',
-        flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+  static Future<void> openUsageAccessSettings() async {
+  if (Platform.isAndroid) {
+    const intent = AndroidIntent(
+      action: 'android.settings.USAGE_ACCESS_SETTINGS',
+      flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+    );
+
+    try {
+      await intent.launch();
+    } catch (e) {
+      print("Gagal membuka usage access: $e");
+
+      const fallbackIntent = AndroidIntent(
+        action: 'android.settings.SETTINGS',
       );
-      
-      try {
-        await intent.launch();
-      } catch (e) {
-        print("Gagal membuka pengaturan: $e");
-        // Jika gagal ke halaman spesifik, buka pengaturan umum
-        const fallbackIntent = AndroidIntent(
-          action: 'android.settings.SETTINGS',
-        );
-        await fallbackIntent.launch();
-      }
+
+      await fallbackIntent.launch();
     }
   }
+}
 }

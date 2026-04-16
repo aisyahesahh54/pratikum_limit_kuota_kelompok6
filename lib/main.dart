@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pratikum_limit_kuota_kelompok6/src/features/monitoring/network_page.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/core/data/database_helper.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/core/data/database_helper.dart';
 
 void main() {
   // Jalankan MyApp, bukan langsung Network

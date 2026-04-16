@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -6,6 +7,16 @@ class DatabaseHelper {
   static Database? _database;
 
   DatabaseHelper._init();
+
+  // 🔥 STREAM CONTROLLER (REAL-TIME UPDATE)
+  final StreamController<void> _controller =
+      StreamController<void>.broadcast();
+
+  Stream<void> get stream => _controller.stream;
+
+  void notifyDataChanged() {
+    _controller.add(null);
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -17,36 +28,47 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
   }
 
   Future _createDB(Database db, int version) async {
-    // Kita buat tabel dengan kolom: date (Primary Key), wifi, mobile
     await db.execute('''
-    CREATE TABLE history (
-      date TEXT PRIMARY KEY, 
-      wifi INTEGER, 
-      mobile INTEGER
-    )
+      CREATE TABLE history (
+        date TEXT PRIMARY KEY,
+        wifi INTEGER,
+        mobile INTEGER
+      )
     ''');
   }
 
   Future<void> insertOrUpdate(String date, int wifi, int mobile) async {
     final db = await instance.database;
 
-    // ConflictAlgorithm.replace akan menimpa data jika tanggal (Primary Key) sama.
-    // Ini berguna karena 'getTodayUsage' dari Kotlin selalu mengembalikan total
-    // akumulasi hari ini dari jam 00:00 sampai sekarang.
     await db.insert(
       'history',
-      {'date': date, 'wifi': wifi, 'mobile': mobile},
+      {
+        'date': date,
+        'wifi': wifi,
+        'mobile': mobile,
+      },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    // 🔥 PENTING: kasih sinyal ke HomePage
+    notifyDataChanged();
   }
 
   Future<List<Map<String, dynamic>>> getHistory() async {
     final db = await instance.database;
-    // Ambil data diurutkan dari tanggal terbaru
     return await db.query('history', orderBy: 'date DESC');
+  }
+
+  // optional: cleanup
+  void dispose() {
+    _controller.close();
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/features/monitoring/network_page.dart';
+import 'package:pratikum_limit_kuota_kelompok6/main_page.dart';
 
 void main() {
   // Jalankan MyApp, bukan langsung Network
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false, // Opsional: hilangkan banner debug
-      home: Network(), // Network sekarang punya akses ke Directionality dari MaterialApp
+      home:MainPage(),
     );
   }
 }

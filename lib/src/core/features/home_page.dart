@@ -105,7 +105,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const Text(
                     "Total Penggunaan",
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: Color.fromARGB(181, 11, 133, 208)),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 23, 144, 209),
                     ),
                   ),
                 ],

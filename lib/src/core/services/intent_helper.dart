@@ -23,4 +23,6 @@ class IntentHelper {
     }
   }
 }
+
+  static void openDataLimitSettings() {}
 }

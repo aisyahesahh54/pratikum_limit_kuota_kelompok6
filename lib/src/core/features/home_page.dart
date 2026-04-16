@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pratikum_limit_kuota_kelompok6/src/core/data/database_helper.dart';
+import 'package:pratikum_limit_kuota_kelompok6/src/features/monitoring/history_page.dart';
 import 'network_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -98,13 +99,6 @@ class _HomePageState extends State<HomePage> {
                     Color(0xFF66BB6A),
                   ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.green.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  )
-                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,20 +138,11 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 10),
 
-                  TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: progress),
-                    duration: const Duration(milliseconds: 500),
-                    builder: (context, value, child) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: value,
-                          minHeight: 12,
-                          backgroundColor: Colors.grey[300],
-                          color: progressColor,
-                        ),
-                      );
-                    },
+                  LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 12,
+                    color: progressColor,
+                    backgroundColor: Colors.grey[300],
                   ),
 
                   const SizedBox(height: 5),
@@ -219,6 +204,47 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            // 🔥 BUTTON NAVIGASI
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Network(),
+                        ),
+                      );
+
+                      _loadTodayData(); // refresh
+                    },
+                    icon: const Icon(Icons.network_check),
+                    label: const Text("Cek Network"),
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HistoryPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.history),
+                    label: const Text("History"),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -236,12 +262,6 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-          )
-        ],
       ),
       child: Column(
         children: [

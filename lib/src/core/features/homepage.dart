@@ -12,7 +12,7 @@ class _HomePageState extends State<HomePage> {
   int wifi = 0;
   int mobile = 0;
 
-  final int limit = 10 * 1024 * 1024 * 1024;
+  final int limit = 10 * 1024 * 1024 * 1024; // 10 GB
 
   @override
   void initState() {
@@ -21,16 +21,31 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadTodayData() async {
-    final data = await DatabaseHelper.instance.getHistory();
+    try {
+      final data = await DatabaseHelper.instance.getHistory();
 
-    if (data.isNotEmpty) {
-      final today = data.first;
+      if (data.isNotEmpty) {
+        final today = data.first;
 
-      setState(() {
-        wifi = (today['wifi'] ?? 0) as int;
-        mobile = (today['mobile'] ?? 0) as int;
-      });
+        setState(() {
+          wifi = _safeToInt(today['wifi']);
+          mobile = _safeToInt(today['mobile']);
+        });
+      } else {
+        setState(() {
+          wifi = 0;
+          mobile = 0;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error load data: $e");
     }
+  }
+
+  int _safeToInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    return int.tryParse(value.toString()) ?? 0;
   }
 
   String _formatBytes(int bytes) {
@@ -45,7 +60,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     int total = wifi + mobile;
-    double progress = total / limit;
+    double progress = limit > 0 ? total / limit : 0;
+    progress = progress.clamp(0, 1);
+
+    Color progressColor =
+        progress > 0.8 ? Colors.red : Colors.green;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -55,7 +74,6 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16),
           children: [
 
-            // 🔥 HEADER
             const Text(
               "Halo 👋",
               style: TextStyle(fontSize: 20),
@@ -68,7 +86,7 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 20),
 
-            // 🔥 CARD TOTAL (LEBIH MODERN)
+            // 🔥 TOTAL CARD
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -109,7 +127,7 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 25),
 
-            // 📊 PROGRESS (LEBIH CANTIK)
+            // 📊 PROGRESS
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -124,15 +142,23 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: progress > 1 ? 1 : progress,
-                      minHeight: 12,
-                      backgroundColor: Colors.grey[300],
-                      color: Colors.green,
-                    ),
+
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: progress),
+                    duration: const Duration(milliseconds: 500),
+                    builder: (context, value, child) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: value,
+                          minHeight: 12,
+                          backgroundColor: Colors.grey[300],
+                          color: progressColor,
+                        ),
+                      );
+                    },
                   ),
+
                   const SizedBox(height: 5),
                   Text(
                     "${_formatBytes(total)} / ${_formatBytes(limit)}",
@@ -169,7 +195,7 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 20),
 
-            // 🚨 SISA KUOTA (LEBIH CLEAN)
+            // 🚨 SISA KUOTA
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(

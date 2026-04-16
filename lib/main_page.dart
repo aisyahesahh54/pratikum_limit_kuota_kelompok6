@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/features/home_page.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/features/settings/settings_page.dart';
+import 'package:pratikum_limit_kuota_kelompok6/settings_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -18,7 +17,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
 
-    _pages = [
+    _pages = const [
       HomePage(),
       SettingsPage(),
     ];

@@ -100,13 +100,6 @@ class _NetworkState extends State<Network> {
     return (number / limit).clamp(0, 1);
   }
 
-  Color _getUsageColor(String value) {
-    double number = double.tryParse(value.split(" ")[0]) ?? 0;
-    if (number >= 900) return Colors.red;
-    if (number >= 700) return Colors.orange;
-    return Colors.green;
-  }
-
   String _totalUsage() {
     double wifi = double.tryParse(wifiUsage.split(" ")[0]) ?? 0;
     double mobile = double.tryParse(mobileUsage.split(" ")[0]) ?? 0;

@@ -19,32 +19,34 @@ class _NetworkState extends State<Network> {
   String wifiUsage = "0.00 MB";
   String mobileUsage = "0.00 MB";
 
-  bool isDarkMode = false;
-  String statusUsage = "Aman";
-
-  Timer? _timer;
+  final int limitBytes = 1024 * 1024 * 1024;
+  Timer? timer;
 
   @override
   void initState() {
     super.initState();
+    fetchUsage();
 
+<<<<<<< HEAD
     fetchUsage(); // 🔥 langsung ambil data pertama
 
     _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+=======
+    timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+>>>>>>> d882196f653b345628fb0daf163dcd0eb5b0666b
       fetchUsage();
     });
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    timer?.cancel();
     super.dispose();
   }
 
   Future<void> fetchUsage() async {
     try {
-      final Map<dynamic, dynamic> result =
-          await platform.invokeMethod('getTodayUsage');
+      final result = await platform.invokeMethod('getTodayUsage');
 
       String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
@@ -61,12 +63,14 @@ class _NetworkState extends State<Network> {
         mobileBytes,
       );
 
+<<<<<<< HEAD
       double totalMb = (wifiBytes + mobileBytes) / (1024 * 1024);
 
+=======
+>>>>>>> d882196f653b345628fb0daf163dcd0eb5b0666b
       setState(() {
         wifiUsage = _formatBytes(wifiBytes);
         mobileUsage = _formatBytes(mobileBytes);
-        _updateStatus(totalMb);
       });
 
       checkLimitAndWarn(wifiBytes + mobileBytes);
@@ -78,6 +82,7 @@ class _NetworkState extends State<Network> {
     }
   }
 
+<<<<<<< HEAD
   void _updateStatus(double totalMb) {
     if (totalMb >= 900) {
       statusUsage = "Bahaya ⚠️";
@@ -88,6 +93,8 @@ class _NetworkState extends State<Network> {
     }
   }
 
+=======
+>>>>>>> d882196f653b345628fb0daf163dcd0eb5b0666b
   String _formatBytes(int bytes) {
     if (bytes <= 0) return "0.00 MB";
     double mb = bytes / (1024 * 1024);
@@ -97,6 +104,7 @@ class _NetworkState extends State<Network> {
     return "${mb.toStringAsFixed(2)} MB";
   }
 
+<<<<<<< HEAD
   double _calculatePercentage(String value) {
     double number = double.tryParse(value.split(" ")[0]) ?? 0;
     double limit = 1024;
@@ -104,21 +112,48 @@ class _NetworkState extends State<Network> {
   }
 
   String _totalUsage() {
+=======
+  double _getTotalMB() {
+>>>>>>> d882196f653b345628fb0daf163dcd0eb5b0666b
     double wifi = double.tryParse(wifiUsage.split(" ")[0]) ?? 0;
     double mobile = double.tryParse(mobileUsage.split(" ")[0]) ?? 0;
-    return "${(wifi + mobile).toStringAsFixed(2)} MB";
+    return wifi + mobile;
+  }
+
+  double _getPercentage() {
+    double totalMB = _getTotalMB();
+    double limitMB = 1024;
+    return (totalMB / limitMB).clamp(0, 1);
+  }
+
+  String _statusText() {
+    double percent = _getPercentage();
+    if (percent >= 1) return "Habis";
+    if (percent >= 0.8) return "Hampir Habis";
+    return "Aman";
+  }
+
+  Color _statusColor() {
+    double percent = _getPercentage();
+    if (percent >= 1) return Colors.red;
+    if (percent >= 0.8) return Colors.orange;
+    return Colors.green;
   }
 
   Future<void> checkLimitAndWarn(int currentUsage) async {
+<<<<<<< HEAD
     int limitInBytes = 10 * 1024 * 1024 * 1024;
 
     if (currentUsage >= limitInBytes) {
+=======
+    if (currentUsage >= limitBytes) {
+>>>>>>> d882196f653b345628fb0daf163dcd0eb5b0666b
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text("Batas Kuota Tercapai!"),
           content: const Text(
-            "Penggunaan data Anda sudah mencapai limit.",
+            "Kuota kamu sudah habis. Aktifkan data limit di pengaturan.",
           ),
           actions: [
             TextButton(
@@ -130,7 +165,7 @@ class _NetworkState extends State<Network> {
                 Navigator.pop(context);
                 IntentHelper.openDataLimitSettings();
               },
-              child: const Text("Buka Pengaturan"),
+              child: const Text("Pengaturan"),
             ),
           ],
         ),
@@ -138,41 +173,43 @@ class _NetworkState extends State<Network> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          isDarkMode ? Colors.black : const Color(0xFFF5F7FB),
-      appBar: AppBar(
-        title: const Text('Monitoring Data'),
-        centerTitle: true,
+  void _showDetail(String title, String value) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("$title Detail"),
+        content: Text("Penggunaan hari ini: $value"),
         actions: [
-          IconButton(
-            icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
-            onPressed: () {
-              setState(() {
-                isDarkMode = !isDarkMode;
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HistoryPage(),
-                ),
-              );
-            },
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Tutup"),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      appBar: AppBar(
+        title: const Text('Monitoring Data'),
+        centerTitle: true,
+        backgroundColor: Colors.black,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: _animatedHistoryButton(),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: fetchUsage,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
+<<<<<<< HEAD
             Text(
               "Total Hari Ini: ${_totalUsage()}",
               style: TextStyle(
@@ -210,38 +247,51 @@ class _NetworkState extends State<Network> {
               icon: const Icon(Icons.refresh),
               label: const Text('Refresh Data'),
             ),
+=======
+            _totalCard(),
+            const SizedBox(height: 20),
+            _usageCard("WiFi", wifiUsage, Icons.wifi),
+            const SizedBox(height: 20),
+            _usageCard("Mobile", mobileUsage, Icons.signal_cellular_alt),
+>>>>>>> d882196f653b345628fb0daf163dcd0eb5b0666b
           ],
         ),
       ),
     );
   }
 
-  Widget _usageCard(String title, String value, IconData icon) {
+  Widget _totalCard() {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+<<<<<<< HEAD
         gradient: LinearGradient(
           colors: [Colors.orange, Colors.deepOrange],
         ),
+=======
+        color: const Color(0xFF1E293B),
+>>>>>>> d882196f653b345628fb0daf163dcd0eb5b0666b
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: Colors.white),
-              const SizedBox(width: 10),
-              Text(title, style: const TextStyle(color: Colors.white)),
-            ],
-          ),
+          const Text("Total Hari Ini", style: TextStyle(color: Colors.white70)),
           const SizedBox(height: 10),
           Text(
-            value,
+            "${_getTotalMB().toStringAsFixed(2)} MB",
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 28,
               color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(value: _getPercentage(), minHeight: 10),
+          const SizedBox(height: 10),
+          Text(
+            "Status: ${_statusText()}",
+            style: TextStyle(
+              color: _statusColor(),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -250,14 +300,94 @@ class _NetworkState extends State<Network> {
     );
   }
 
+  Widget _usageCard(String title, String value, IconData icon) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () {
+        _showDetail(title, value);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 40, color: Colors.blue),
+            const SizedBox(width: 15),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white70)),
+                const SizedBox(height: 5),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _animatedHistoryButton() {
+    return StatefulBuilder(
+      builder: (context, setStateBtn) {
+        double scale = 1;
+
+        return GestureDetector(
+          onTapDown: (_) => setStateBtn(() => scale = 0.85),
+          onTapUp: (_) {
+            setStateBtn(() => scale = 1);
+
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                transitionDuration: const Duration(milliseconds: 400),
+                pageBuilder: (_, __, ___) => const HistoryPage(),
+                transitionsBuilder: (_, animation, __, child) {
+                  return SlideTransition(
+                    position: Tween(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+              ),
+            );
+          },
+          child: AnimatedScale(
+            scale: scale,
+            duration: const Duration(milliseconds: 150),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.history, color: Colors.white),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showPermissionDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text("Izin Diperlukan"),
-        content: const Text(
-          "Aktifkan izin penggunaan data di pengaturan.",
-        ),
+        content: const Text("Aktifkan akses usage di pengaturan."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -268,7 +398,7 @@ class _NetworkState extends State<Network> {
               Navigator.pop(context);
               fetchUsage();
             },
-            child: const Text("OK"),
+            child: const Text("Coba Lagi"),
           ),
         ],
       ),

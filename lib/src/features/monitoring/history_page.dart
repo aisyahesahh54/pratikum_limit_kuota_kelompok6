@@ -40,9 +40,49 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
+      appBar: AppBar(title: const Text("Riwayat Penggunaan")),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _historyList,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("Belum ada riwayat data."));
+          }
+
+          final data = snapshot.data!;
+          return ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              final item = data[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: ListTile(
+                  leading: const Icon(Icons.history, color: Color.fromARGB(255, 33, 233, 243)),
+                  title: Text(
+                    item['date'], // Tanggal (YYYY-MM-DD)
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("WiFi: ${_formatBytes(item['wifi'])}"),
+                      Text("Mobile: ${_formatBytes(item['mobile'])}"),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+=======
       appBar: AppBar(
         title: const Text("Riwayat Penggunaan"),
         centerTitle: true,
+>>>>>>> aab86ec13858046dbe37434fdee1b872e2460278
       ),
       body: _historyList == null
           ? const Center(child: CircularProgressIndicator())

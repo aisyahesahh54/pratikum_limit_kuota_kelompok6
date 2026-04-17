@@ -1,6 +1,9 @@
+// home_page.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../core/data/database_helper.dart';
+import 'package:pratikum_limit_kuota_kelompok6/src/core/data/database_helper.dart';
+
+// (ISI HOMEPAGE KAMU DI SINI SAJA)
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

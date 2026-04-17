@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'package:pratikum_limit_kuota_kelompok6/src/core/features/home_page.dart';
 import 'settings_page.dart';
 
 class MainPage extends StatefulWidget {

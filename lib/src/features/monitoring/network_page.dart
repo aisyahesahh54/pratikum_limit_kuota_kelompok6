@@ -28,7 +28,8 @@ class _NetworkState extends State<Network> {
   void initState() {
     super.initState();
 
-    // 🔥 AUTO REFRESH LEBIH AMAN
+    fetchUsage(); // 🔥 langsung ambil data pertama
+
     _timer = Timer.periodic(const Duration(seconds: 10), (_) {
       fetchUsage();
     });
@@ -50,13 +51,15 @@ class _NetworkState extends State<Network> {
       int wifiBytes = result['wifi'] ?? 0;
       int mobileBytes = result['mobile'] ?? 0;
 
+      // 🔥 DEBUG (cek apakah data masuk)
+      print("wifiBytes: $wifiBytes");
+      print("mobileBytes: $mobileBytes");
+
       await DatabaseHelper.instance.insertOrUpdate(
         todayDate,
         wifiBytes,
         mobileBytes,
       );
-
-      DatabaseHelper.instance.notifyDataChanged();
 
       double totalMb = (wifiBytes + mobileBytes) / (1024 * 1024);
 
@@ -67,6 +70,7 @@ class _NetworkState extends State<Network> {
       });
 
       checkLimitAndWarn(wifiBytes + mobileBytes);
+
     } on PlatformException catch (e) {
       if (e.code == "PERMISSION_DENIED") {
         _showPermissionDialog();
@@ -74,7 +78,6 @@ class _NetworkState extends State<Network> {
     }
   }
 
-  // ✅ FIX LOGIC STATUS
   void _updateStatus(double totalMb) {
     if (totalMb >= 900) {
       statusUsage = "Bahaya ⚠️";
@@ -96,7 +99,7 @@ class _NetworkState extends State<Network> {
 
   double _calculatePercentage(String value) {
     double number = double.tryParse(value.split(" ")[0]) ?? 0;
-    double limit = 1024; // 1GB
+    double limit = 1024;
     return (number / limit).clamp(0, 1);
   }
 
@@ -107,7 +110,7 @@ class _NetworkState extends State<Network> {
   }
 
   Future<void> checkLimitAndWarn(int currentUsage) async {
-    int limitInBytes = 10 * 1024 * 1024 * 1024; // 10 GB
+    int limitInBytes = 10 * 1024 * 1024 * 1024;
 
     if (currentUsage >= limitInBytes) {
       showDialog(
@@ -178,9 +181,7 @@ class _NetworkState extends State<Network> {
                 color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
-
             const SizedBox(height: 10),
-
             Text(
               "Status: $statusUsage",
               style: TextStyle(
@@ -193,21 +194,16 @@ class _NetworkState extends State<Network> {
                         : Colors.green,
               ),
             ),
-
             const SizedBox(height: 10),
-
             LinearProgressIndicator(
               value: _calculatePercentage(_totalUsage()),
               minHeight: 10,
             ),
-
             const SizedBox(height: 20),
-
             _usageCard("WiFi Today", wifiUsage, Icons.wifi),
             const SizedBox(height: 20),
             _usageCard("Mobile Today", mobileUsage,
                 Icons.signal_cellular_alt),
-
             const SizedBox(height: 30),
             ElevatedButton.icon(
               onPressed: fetchUsage,
@@ -226,7 +222,7 @@ class _NetworkState extends State<Network> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.orange.shade400, Colors.deepOrange.shade400],
+          colors: [Colors.orange, Colors.deepOrange],
         ),
         borderRadius: BorderRadius.circular(20),
       ),

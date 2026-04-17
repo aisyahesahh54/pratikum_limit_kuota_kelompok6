@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:pratikum_limit_kuota_kelompok6/src/core/data/database_helper.dart';
+import '../core/data/database_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,10 +18,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
     _loadData();
 
-    // 🔥 REAL-TIME LISTENER
     _sub = DatabaseHelper.instance.onDataChanged.listen((_) {
       _loadData();
     });
@@ -32,19 +30,12 @@ class _HomePageState extends State<HomePage> {
 
     if (data.isEmpty) return;
 
-    final today = data.first; // aman karena sudah dicek
-
-    if (!mounted) return;
+    final today = data.first;
 
     setState(() {
-      wifi = _safeToInt(today['wifi']);
-      mobile = _safeToInt(today['mobile']);
+      wifi = today['wifi'] ?? 0;
+      mobile = today['mobile'] ?? 0;
     });
-  }
-
-  int _safeToInt(dynamic value) {
-    if (value == null) return 0;
-    return int.tryParse(value.toString()) ?? 0;
   }
 
   String _formatBytes(int bytes) {
@@ -74,37 +65,55 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Home Monitoring"),
         centerTitle: true,
       ),
-      body: Center(
-  child: Container(
-    padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      color: const Color.fromARGB(255, 9, 103, 170),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          "Wifi: ${_formatBytes(wifi)}",
-          style: const TextStyle(fontSize: 18),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            _card("WiFi", _formatBytes(wifi), Icons.wifi),
+            const SizedBox(height: 15),
+            _card("Mobile", _formatBytes(mobile),
+                Icons.signal_cellular_alt),
+            const SizedBox(height: 15),
+            _card("Total", _formatBytes(total), Icons.data_usage,
+                isBold: true),
+          ],
         ),
-        const SizedBox(height: 10),
-        Text(
-          "Kuota: ${_formatBytes(mobile)}",
-          style: const TextStyle(fontSize: 18),
-        ),
-        const SizedBox(height: 15),
-        Text(
-          "Total: ${_formatBytes(wifi + mobile)}",
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    ),
-  ),
-),
+      ),
+    );
+  }
+
+  Widget _card(String title, String value, IconData icon,
+      {bool isBold = false}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.blueAccent,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 30),
+          const SizedBox(width: 15),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: const TextStyle(
+                      color: Colors.white, fontSize: 16)),
+              Text(
+                value,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: isBold ? 22 : 18,
+                  fontWeight:
+                      isBold ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 }

@@ -24,6 +24,8 @@ class DatabaseHelper {
     return _database!;
   }
 
+  get onDataChanged => null;
+
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);

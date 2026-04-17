@@ -26,7 +26,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
     double mb = bytes / (1024 * 1024);
 
-    if (mb > 1024) {
+    if (mb >= 1024) {
       return "${(mb / 1024).toStringAsFixed(2)} GB";
     }
 
@@ -69,71 +69,87 @@ class _HistoryPageState extends State<HistoryPage> {
               final mobile = item['mobile'] as int;
               final total = wifi + mobile;
 
+              /// 🔥 LIMIT (1GB)
+              final limit = 1024 * 1024 * 1024;
+
+              double percentage = (total / limit) * 100;
+
+              String status;
+              Color statusColor;
+
+              if (percentage >= 90) {
+                status = "Bahaya ⚠️";
+                statusColor = Colors.red;
+              } else if (percentage >= 70) {
+                status = "Waspada ⚡";
+                statusColor = Colors.orange;
+              } else {
+                status = "Aman ✅";
+                statusColor = Colors.green;
+              }
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  gradient: LinearGradient(
-                    colors: [Colors.blue.shade50, Colors.white],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.1),
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
+                  color: Theme.of(context).brightness ==
+                          Brightness.dark
+                      ? Colors.grey[900]
+                      : Colors.grey[200],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    /// 📅 TANGGAL
+                    Text(
+                      item['date'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    /// WIFI
+                    Text("WiFi: ${_formatBytes(wifi)}"),
+
+                    /// MOBILE
+                    Text("Mobile: ${_formatBytes(mobile)}"),
+
+                    /// TOTAL
+                    Text(
+                      "Total: ${_formatBytes(total)}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    /// 📊 PERSENTASE
+                    Text(
+                      "Pemakaian: ${percentage.toStringAsFixed(1)}%",
+                    ),
+
+                    /// 🚨 STATUS
+                    Text(
+                      "Status: $status",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    /// 📉 PROGRESS BAR
+                    LinearProgressIndicator(
+                      value: (percentage / 100).clamp(0, 1),
                     ),
                   ],
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(15),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blue.shade100,
-                    child: const Icon(Icons.calendar_today,
-                        color: Colors.blue),
-                  ),
-                  title: Text(
-                    item['date'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-
-                      Row(
-                        children: [
-                          const Icon(Icons.wifi,
-                              size: 16, color: Colors.green),
-                          const SizedBox(width: 5),
-                          Text("WiFi: ${_formatBytes(wifi)}"),
-                        ],
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      Row(
-                        children: [
-                          const Icon(Icons.network_cell,
-                              size: 16, color: Colors.orange),
-                          const SizedBox(width: 5),
-                          Text("Mobile: ${_formatBytes(mobile)}"),
-                        ],
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      Text(
-                        "Total: ${_formatBytes(total)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               );
             },

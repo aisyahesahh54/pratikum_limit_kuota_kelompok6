@@ -56,7 +56,7 @@ class _HistoryPageState extends State<HistoryPage> {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: ListTile(
-                  leading: const Icon(Icons.history, color: Colors.blue),
+                  leading: const Icon(Icons.history, color: Color.fromARGB(255, 33, 233, 243)),
                   title: Text(
                     item['date'], // Tanggal (YYYY-MM-DD)
                     style: const TextStyle(fontWeight: FontWeight.bold),

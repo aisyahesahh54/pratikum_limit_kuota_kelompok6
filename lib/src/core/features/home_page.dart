@@ -29,29 +29,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadData() async {
-    final data = await DatabaseHelper.instance.getHistory();
-
-    if (data.isEmpty) return;
-
-    final today = data.first;
-
-    setState(() {
-      wifi = today['wifi'] ?? 0;
-      mobile = today['mobile'] ?? 0;
-    });
-  }
-
+  setState(() {
+    wifi = 50 * 1024 * 1024;    // 50 MB
+    mobile = 120 * 1024 * 1024; // 120 MB
+  });
+}
   String _formatBytes(int bytes) {
-    if (bytes <= 0) return "0 MB";
+  if (bytes <= 0) return "1 MB"; // 👈 MINIMUM
 
-    double mb = bytes / (1024 * 1024);
+  double mb = bytes / (1024 * 1024);
 
-    if (mb >= 1024) {
-      return "${(mb / 1024).toStringAsFixed(2)} GB";
-    }
-
-    return "${mb.toStringAsFixed(2)} MB";
+  if (mb >= 1024) {
+    return "${(mb / 1024).toStringAsFixed(2)} GB";
   }
+
+  return "${mb.toStringAsFixed(2)} MB";
+}
 
   @override
   void dispose() {

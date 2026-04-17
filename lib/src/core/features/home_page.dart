@@ -75,21 +75,36 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
       ),
       body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 9, 103, 170),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            "Total Hari Ini: ${_formatBytes(total)}",
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+  child: Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 9, 103, 170),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "Wifi: ${_formatBytes(wifi)}",
+          style: const TextStyle(fontSize: 18),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          "Kuota: ${_formatBytes(mobile)}",
+          style: const TextStyle(fontSize: 18),
+        ),
+        const SizedBox(height: 15),
+        Text(
+          "Total: ${_formatBytes(wifi + mobile)}",
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      ),
+      ],
+    ),
+  ),
+),
     );
   }
 }

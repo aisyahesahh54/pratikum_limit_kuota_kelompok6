@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -21,17 +22,22 @@ class _NetworkState extends State<Network> {
   bool isDarkMode = false;
   String statusUsage = "Aman";
 
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
-    _startAutoRefresh();
+
+    // 🔥 AUTO REFRESH LEBIH AMAN
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+      fetchUsage();
+    });
   }
 
-  void _startAutoRefresh() async {
-    while (mounted) {
-      await fetchUsage();
-      await Future.delayed(const Duration(seconds: 10));
-    }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> fetchUsage() async {
@@ -50,15 +56,13 @@ class _NetworkState extends State<Network> {
         mobileBytes,
       );
 
+      DatabaseHelper.instance.notifyDataChanged();
+
+      double totalMb = (wifiBytes + mobileBytes) / (1024 * 1024);
+
       setState(() {
         wifiUsage = _formatBytes(wifiBytes);
         mobileUsage = _formatBytes(mobileBytes);
-      });
-
-      double totalMb =
-          (wifiBytes + mobileBytes) / (1024 * 1024);
-
-      setState(() {
         _updateStatus(totalMb);
       });
 
@@ -70,17 +74,17 @@ class _NetworkState extends State<Network> {
     }
   }
 
+  // ✅ FIX LOGIC STATUS
   void _updateStatus(double totalMb) {
     if (totalMb >= 900) {
       statusUsage = "Bahaya ⚠️";
     } else if (totalMb >= 700) {
       statusUsage = "Waspada ⚡";
-    } else if (totalMb >= 500) {
+    } else {
       statusUsage = "Aman ✅";
-    } else if (totalMb >= 500) {
+    }
   }
 
-}
   String _formatBytes(int bytes) {
     if (bytes <= 0) return "0.00 MB";
     double mb = bytes / (1024 * 1024);
@@ -92,15 +96,8 @@ class _NetworkState extends State<Network> {
 
   double _calculatePercentage(String value) {
     double number = double.tryParse(value.split(" ")[0]) ?? 0;
-    double limit = 1024;
+    double limit = 1024; // 1GB
     return (number / limit).clamp(0, 1);
-  }
-
-  Color _getUsageColor(String value) {
-    double number = double.tryParse(value.split(" ")[0]) ?? 0;
-    if (number >= 900) return const Color.fromARGB(255, 212, 209, 11);
-    if (number >= 700) return const Color.fromARGB(255, 190, 198, 255);
-    return Colors.green;
   }
 
   String _totalUsage() {
@@ -110,7 +107,7 @@ class _NetworkState extends State<Network> {
   }
 
   Future<void> checkLimitAndWarn(int currentUsage) async {
-    int limitInBytes = 2024 * 2024 * 2024;
+    int limitInBytes = 10 * 1024 * 1024 * 1024; // 10 GB
 
     if (currentUsage >= limitInBytes) {
       showDialog(
@@ -118,7 +115,7 @@ class _NetworkState extends State<Network> {
         builder: (context) => AlertDialog(
           title: const Text("Batas Kuota Tercapai!"),
           content: const Text(
-            "Penggunaan data Anda sudah mencapai limit. Aktifkan 'Set Data Limit' di pengaturan sistem.",
+            "Penggunaan data Anda sudah mencapai limit.",
           ),
           actions: [
             TextButton(
@@ -161,7 +158,8 @@ class _NetworkState extends State<Network> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const HistoryPage()),
+                  builder: (context) => const HistoryPage(),
+                ),
               );
             },
           ),
@@ -229,57 +227,27 @@ class _NetworkState extends State<Network> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.orange.shade400, Colors.deepOrange.shade400],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          )
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 40, color: Colors.white),
-              const SizedBox(width: 15),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Icon(icon, color: Colors.white),
+              const SizedBox(width: 10),
+              Text(title, style: const TextStyle(color: Colors.white)),
             ],
           ),
           const SizedBox(height: 10),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 26,
-              color: _getUsageColor(value),
+            style: const TextStyle(
+              fontSize: 24,
+              color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
-          ),
-          const SizedBox(height: 10),
-
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: _calculatePercentage(value)),
-            duration: const Duration(seconds: 1),
-            builder: (context, val, _) {
-              return LinearProgressIndicator(
-                value: val,
-                backgroundColor:
-                    const Color.fromARGB(192, 194, 141, 18),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color.fromARGB(255, 165, 76, 2)),
-              );
-            },
           ),
         ],
       ),
@@ -289,28 +257,25 @@ class _NetworkState extends State<Network> {
   void _showPermissionDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Izin Diperlukan"),
-          content: const Text(
-            "Aplikasi membutuhkan izin akses penggunaan. Silakan aktifkan di pengaturan.",
+      builder: (context) => AlertDialog(
+        title: const Text("Izin Diperlukan"),
+        content: const Text(
+          "Aktifkan izin penggunaan data di pengaturan.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Batal"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                fetchUsage();
-              },
-              child: const Text("Buka Pengaturan"),
-            ),
-          ],
-        );
-      },
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              fetchUsage();
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
     );
   }
 }

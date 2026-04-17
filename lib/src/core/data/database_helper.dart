@@ -24,7 +24,7 @@ class DatabaseHelper {
     return _database!;
   }
 
-  get onDataChanged => null;
+  Stream<void> get onDataChanged => _controller.stream;
 
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();

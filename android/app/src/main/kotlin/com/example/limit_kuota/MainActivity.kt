@@ -56,31 +56,35 @@ class MainActivity : FlutterActivity() {
         startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    private fun getUsage(networkType: Int): Long {
-        val networkStatsManager = getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
+  private fun getUsage(networkType: Int): Long {
+    val networkStatsManager =
+        getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
 
-        val start = calendar.timeInMillis
-        val end = System.currentTimeMillis()
-        var total: Long = 0
+    val calendar = Calendar.getInstance()
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
 
-        try {
-            // Kita gunakan querySummary untuk iterasi semua bucket data
-            // null digunakan untuk SubscriberID agar mencakup semua SIM/WiFi
-            val stats = networkStatsManager.querySummary(networkType, null, start, end)
-            val bucket = NetworkStats.Bucket()
-            while (stats.hasNextBucket()) {
-                stats.getNextBucket(bucket)
-                total += bucket.rxBytes + bucket.txBytes
-            }
-            stats.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
+    val start = calendar.timeInMillis
+    val end = System.currentTimeMillis()
+    var total: Long = 0
+
+    try {
+        val stats = networkStatsManager.querySummary(networkType, null, start, end)
+
+        val bucket = NetworkStats.Bucket()
+        while (stats.hasNextBucket()) {
+            stats.getNextBucket(bucket)
+            total += bucket.rxBytes + bucket.txBytes
         }
-        return total
+        stats.close()
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return 0 // 🔥 penting supaya tidak crash
     }
+
+    return total
+}
 }

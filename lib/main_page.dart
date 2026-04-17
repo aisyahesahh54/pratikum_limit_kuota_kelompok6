@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pratikum_limit_kuota_kelompok6/settings_page.dart';
+import 'package:pratikum_limit_kuota_kelompok6/src/core/features/home_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -11,33 +12,23 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _index = 0;
 
-  late final List<Widget> _pages;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _pages = const [
-      HomePage(),
-      SettingsPage(),
-    ];
-  }
+  final List<Widget> _pages = const [
+    HomePage(),
+    SettingsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(   // 🔥 penting biar state tidak reset
-        index: _index,
-        children: _pages,
-      ),
+      body: _pages[_index],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (value) {
-          setState(() => _index = value);
+          setState(() {
+            _index = value;
+          });
         },
-        type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
